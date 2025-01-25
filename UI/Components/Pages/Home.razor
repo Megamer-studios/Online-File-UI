@@ -1,0 +1,35 @@
+﻿@page "/"
+@rendermode InteractiveServer
+
+
+
+<div class="grid grid-cols-12 gap-4">
+    @foreach (string file in files)
+    {
+
+        <div class="bg-sky-400 text-4xl overflow-x-scroll w-full">
+            <a class="" href="@file.Substring(8, file.Length-8)" target="_blank">
+                @if (file.Contains(".png") || file.Contains(".jpeg") || file.Contains(".jpg"))
+                {
+                    <img src="@file.Substring(8, file.Length-8)" />
+                }
+                else {
+                    @file.Substring(8, file.Length - 8)
+                }
+                
+            </a>
+
+        </div>
+
+    }
+</div>
+
+
+
+
+
+@code {
+    public String[] files = Directory.GetFiles(@"wwwroot/Items");
+    
+
+}
