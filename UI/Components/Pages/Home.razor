@@ -7,19 +7,22 @@
     @foreach (string file in files)
     {
 
-        <div class="bg-sky-400 text-4xl overflow-x-scroll w-full">
-            <a class="" href="@file.Substring(8, file.Length-8)" target="_blank">
+        
+            <a class="w-full h-full" href="@file.Substring(8, file.Length-8)" target="_blank">
                 @if (file.Contains(".png") || file.Contains(".jpeg") || file.Contains(".jpg"))
-                {
+                {<div class="cs-btn  overflow-x-scroll w-full h-full">
                     <img src="@file.Substring(8, file.Length-8)" />
+                </div>
                 }
                 else {
-                    @file.Substring(8, file.Length - 8)
+                <div class="cs-btn  overflow-x-scroll w-full h-full">
+                    @file.Substring(15, file.Length - 15)
+                    </div>
                 }
                 
             </a>
 
-        </div>
+        
 
     }
 </div>
