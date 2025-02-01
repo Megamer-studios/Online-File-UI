@@ -1,1 +1,5 @@
-outdated but too lazy to hide the API keys soo it stays like this on GitHub 
+Online file sharing service.
+
+insecure but works.
+
+Only the specified admin account has access to deleting and importing files but all users can see them.
