@@ -1,28 +1,78 @@
 ﻿@page "/"
 @rendermode InteractiveServer
+@using Logto.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+@inject IJSRuntime jsRuntime
+
+<h1 class="cs-hr text-3xl text-center">Aquamarine Library</h1>
+
+@if (User.Claims.FirstOrDefault(c => c.Type == LogtoParameters.Claims.Subject)?.Value == "PUT OWNER USER ID HERE")
+// Fill the fields
+{
+    <h1 class="cs-hr text-3xl text-center">Debug @dbg @ErrorMessage @PPath</h1>
+}
+else{
+    <h1 class="cs-hr text-3xl text-center"></h1>
+}
+<div class="flex gap-2 w-screen">
+    @if (User.Claims.FirstOrDefault(c => c.Type == LogtoParameters.Claims.Subject)?.Value == "PUT OWNER USER ID HERE")
+    // Fill the fields
+    {
+        <a href="/delete">
+            <button class="cs-btn">delete file</button>
+
+        </a>
+        <div>
+            <button class="cs-btn" onclick="document.getElementById('inpt1').click()">import file</button>
+            <InputFile id="inpt1" OnChange="@import" hidden draggable="true" />
+        </div>
+    }
+    
+
+    <div class="items-right place-right justify-right">
+
+
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <button class="cs-btn" @onclick="SignOut">Sign out</button>
+        }
+        else
+        {
+            <button class="cs-btn" @onclick="SignIn">Sign in</button>
+        }
 
 
 
+
+
+    </div>
+
+</div>
+
+<div style="height: 10px;"></div>
 <div class="grid grid-cols-12 gap-4">
     @foreach (string file in files)
     {
 
-        
-            <a class="w-full h-full" href="@file.Substring(8, file.Length-8)" target="_blank">
-                @if (file.Contains(".png") || file.Contains(".jpeg") || file.Contains(".jpg"))
-                {<div class="cs-btn  overflow-x-scroll w-full h-full">
+
+        <a class="w-full h-full hover:animate-pulse" href="@file.Substring(8, file.Length-8)" target="_blank">
+            @if (file.Contains(".png") || file.Contains(".jpeg") || file.Contains(".jpg") || file.Contains(".gif"))
+            {<div class="cs-btn  overflow-x-scroll w-full h-full">
                     <img src="@file.Substring(8, file.Length-8)" />
                 </div>
-                }
-                else {
+            }
+            else {
                 <div class="cs-btn  overflow-x-scroll w-full h-full">
-                    @file.Substring(15, file.Length - 15)
-                    </div>
-                }
-                
-            </a>
+                    @file.Substring(14, file.Length - 14)
+                </div>
+            }
 
-        
+        </a>
+
+
 
     }
 </div>
@@ -33,6 +83,87 @@
 
 @code {
     public String[] files = Directory.GetFiles(@"wwwroot/Items");
+    public string dbg { get; set; } = "";
+    public string deldi { get; set; }
+    public string FileName { get; set; } = "";
+    public long FileSize { get; set; } 
+    public string FileType { get; set; } = "";
+    public DateTimeOffset LastModified { get; set; }
+    const int MAX_FILESIZE = 500000 * 1024;
+    public string ErrorMessage { get; set; } = "";
+    public string PPath { get; set; } = "";
     
+    private ClaimsPrincipal? User { get; set; }
 
+    public async Task import(InputFileChangeEventArgs args) {
+
+        dbg = args.File.Name;
+        // var fefe = File.Create(@"wwwroot/Items" + args.File.Name);
+        // dbg = args.File.Name + "1";
+        // File.WriteAllText(fefe.Name, args.File.ToString());
+        // dbg = args.File.Name + "2";
+        // Reload();
+        // dbg = args.File.Name + "3";
+        var browserFile = args.File;
+        dbg = args.File.Name + "1";
+        if (browserFile != null) {
+            FileSize = browserFile.Size;
+            FileType = browserFile.ContentType;
+            FileName = browserFile.Name;
+            LastModified = browserFile.LastModified;
+            dbg = args.File.Name + "2";
+
+            try {
+                var fileStream = browserFile.OpenReadStream(MAX_FILESIZE);
+                dbg = args.File.Name + "3";
+                // var randomFile = Path.GetTempFileName();
+                // var extension = Path.GetExtension(browserFile.Name);
+                var targetFilePath = /* Path.ChangeExtension(randomFile, extension); */ @"wwwroot/Items/" + args.File.Name;
+                dbg = args.File.Name + "4";
+                var targetStream = new FileStream(targetFilePath, FileMode.Create);
+                PPath = targetFilePath.ToString();
+                dbg = args.File.Name + "5";
+                await fileStream.CopyToAsync(targetStream);
+                dbg = args.File.Name + "6";
+                targetStream.Close();
+            }
+            catch(Exception exception){
+                ErrorMessage = exception.Message;
+            }
+        }
+        Reload();
+
+    }
+    private async Task Reload()
+    {
+        string url = "/";
+        await jsRuntime.InvokeAsync<object>("open", url, "_self");
+    }
+
+    public void inpte() {
+
+        var claims = User.Claims;
+
+        // Get the user ID
+        var userId = claims.FirstOrDefault(c => c.Type == LogtoParameters.Claims.Subject)?.Value;
+
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        User = authState.User;
+
+       
+    }
+
+    private void SignIn()
+    {
+        NavigationManager.NavigateTo("/SignIn", forceLoad: true);
+    }
+
+    private void SignOut()
+    {
+        NavigationManager.NavigateTo("/SignOut", forceLoad: true);
+    }
 }

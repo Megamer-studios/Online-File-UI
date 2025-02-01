@@ -1,0 +1,86 @@
+﻿@page "/delete"
+@rendermode InteractiveServer
+@using Logto.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+@inject IJSRuntime jsRuntime
+
+@if (User.Claims.FirstOrDefault(c => c.Type == LogtoParameters.Claims.Subject)?.Value == "PUT OWNER USER ID HERE")
+// Fill the fields
+{
+    <h1 class="cs-hr text-5xl text-red-500 text-center">!WARNING!</h1>
+    <h1 class="cs-hr text-5xl text-red-500 text-center">You are in delete mode.</h1>
+    @if (User.Claims.FirstOrDefault(c => c.Type == LogtoParameters.Claims.Subject)?.Value == "PUT OWNER USER ID HERE")
+    // Fill the fields
+    {
+        <h1 class="cs-hr text-3xl text-center">Debug @dbg @ErrorMessage @PPath</h1>
+    }
+    else
+    {
+        <h1 class="cs-hr text-3xl text-center"></h1>
+    }
+    <div class="flex">
+        <a href="/" >
+            <button class="cs-btn">Home</button>
+        </a>
+    </div>
+    <div class="grid grid-cols-12 gap-4">
+        @foreach (string file in files)
+        {
+            string filename = file;
+
+            <a class="w-full h-full hover:animate-pulse">
+                @if (filename.Contains(".png") || filename.Contains(".jpeg") || filename.Contains(".jpg") || file.Contains(".gif"))
+                {
+                    <div @onclick="() => {Delt(filename);}" class="cs-btn overflow-x-scroll w-full h-full">
+                        <img src="@filename.Substring(8, filename.Length-8)" />
+                    </div>
+                }
+                else
+                {
+                    <div @onclick="() => {Delt(filename);}" class="cs-btn  overflow-x-scroll w-full h-full">
+                        @filename.Substring(14, filename.Length - 14)
+                    </div>
+                }
+
+            </a>
+
+
+
+        }
+    </div>
+}
+
+@code {
+    public String[] files = Directory.GetFiles(@"wwwroot/Items");
+    public string Direc { get; set; }
+    private ClaimsPrincipal? User { get; set; }
+    public string dbg { get; set; } = "";
+    public string ErrorMessage { get; set; } = "";
+    public string PPath { get; set; } = "";
+
+    public void Delt(string ern) {
+        if (ern != null) {
+            PPath = ern;
+            File.Delete(PPath);
+            Reload();
+        }
+
+
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        User = authState.User;
+
+
+    }
+    private async Task Reload()
+    {
+        string url = "/delete";
+        await jsRuntime.InvokeAsync<object>("open", url, "_self");
+    }
+   
+}

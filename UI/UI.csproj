@@ -10,4 +10,8 @@
     <Folder Include="wwwroot\Items\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Logto.AspNetCore.Authentication" Version="0.2.0" />
+  </ItemGroup>
+
 </Project>

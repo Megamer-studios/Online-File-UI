@@ -1,4 +1,6 @@
 using UI.Components;
+using Logto.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication;
 
 namespace UI
 {
@@ -12,7 +14,21 @@ namespace UI
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
 
+            builder.Services.AddLogtoAuthentication(options =>
+            {
+                options.Endpoint = "PUT ENDPOINT HERE";
+                options.AppId = "PUT APPID HERE";
+                options.AppSecret = "PUT APPSECRET HERE";
+                // Fill the fields
+            });
+
+            builder.Services.AddCascadingAuthenticationState();
+
             var app = builder.Build();
+
+            app.UseAuthentication();
+
+            
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
@@ -29,6 +45,30 @@ namespace UI
 
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();
+
+            app.MapGet("/SignIn", async context =>
+            {
+                if (!(context.User?.Identity?.IsAuthenticated ?? false))
+                {
+                    await context.ChallengeAsync(new AuthenticationProperties { RedirectUri = "/" });
+                }
+                else
+                {
+                    context.Response.Redirect("/");
+                }
+            });
+
+            app.MapGet("/SignOut", async context =>
+            {
+                if (context.User?.Identity?.IsAuthenticated ?? false)
+                {
+                    await context.SignOutAsync(new AuthenticationProperties { RedirectUri = "/" });
+                }
+                else
+                {
+                    context.Response.Redirect("/");
+                }
+            });
 
             app.Run();
         }
