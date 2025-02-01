@@ -5,7 +5,7 @@ This project is a Blazor-based web application that facilitates authentication, 
 
 ---
 
-### 1. **HTML File (index.html)**
+### 1. **APP Setup (App.razor)**
 
 This file is the entry point of the application, setting up the HTML page structure, styling, and script references.
 
